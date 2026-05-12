@@ -1,0 +1,2 @@
+requests>=2.32
+defusedxml>=0.7

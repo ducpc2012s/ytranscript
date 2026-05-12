@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transcript Studio</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace" aria-labelledby="app-title">
+        <div class="intro">
+          <p class="eyebrow">YouTube Transcript API</p>
+          <h1 id="app-title">Transcript Studio</h1>
+          <p class="lead">
+            Dán link video YouTube, chọn kiểu xuất, nhận transcript rõ ràng để đọc,
+            copy hoặc tải về.
+          </p>
+        </div>
+
+        <form class="panel controls" id="transcript-form">
+          <label class="field">
+            <span>Link video</span>
+            <input
+              id="video-url"
+              name="url"
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label class="field compact">
+            <span>Ngôn ngữ ưu tiên</span>
+            <input id="languages" name="languages" value="vi,en" />
+          </label>
+
+          <fieldset class="format-choice">
+            <legend>Định dạng</legend>
+            <label>
+              <input type="radio" name="format" value="plain" checked />
+              <span>Không timestamp</span>
+            </label>
+            <label>
+              <input type="radio" name="format" value="timestamp" />
+              <span>Có timestamp</span>
+            </label>
+          </fieldset>
+
+          <button class="primary-action" id="submit-button" type="submit">
+            Lấy transcript
+          </button>
+        </form>
+
+        <section class="panel output" aria-live="polite">
+          <div class="output-head">
+            <div>
+              <p class="eyebrow">Kết quả</p>
+              <h2 id="result-title">Sẵn sàng xử lý video</h2>
+            </div>
+            <div class="actions">
+              <button type="button" id="copy-button" disabled>Copy</button>
+              <button type="button" id="download-button" disabled>Tải .txt</button>
+            </div>
+          </div>
+
+          <div class="meta" id="meta"></div>
+          <pre id="result" class="result" tabindex="0">Transcript sẽ hiển thị ở đây sau khi xử lý.</pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
