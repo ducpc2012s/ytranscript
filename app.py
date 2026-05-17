@@ -33,6 +33,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - startup guard
 
 
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+LANGUAGE_CODE_RE = re.compile(r"^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$")
 
 
 @dataclass(frozen=True)
@@ -85,15 +86,38 @@ def normalize_languages(value: Any) -> list[str]:
     elif isinstance(value, str):
         languages = value.split(",")
     else:
-        languages = ["vi", "en"]
+        languages = []
 
-    cleaned = [item.strip().lower() for item in languages if str(item).strip()]
-    return cleaned or ["vi", "en"]
+    cleaned: list[str] = []
+    for item in languages:
+        language_code = str(item).strip().lower()
+        if "=" in language_code:
+            language_code = language_code.rsplit("=", 1)[-1].strip()
+        if LANGUAGE_CODE_RE.fullmatch(language_code):
+            cleaned.append(language_code)
+
+    return cleaned
+
+
+def fetch_best_available_transcript(video_id: str, languages: list[str]):
+    transcript_list = YouTubeTranscriptApi().list(video_id)
+
+    if languages:
+        try:
+            return transcript_list.find_transcript(languages).fetch()
+        except YouTubeTranscriptApiException:
+            pass
+
+    available_transcripts = list(transcript_list)
+    if available_transcripts:
+        return available_transcripts[0].fetch()
+
+    return transcript_list.find_transcript(languages).fetch()
 
 
 def fetch_transcript(video_url: str, with_timestamps: bool, languages: list[str]) -> TranscriptResult:
     video_id = extract_video_id(video_url)
-    transcript = YouTubeTranscriptApi().fetch(video_id, languages=languages)
+    transcript = fetch_best_available_transcript(video_id, languages)
     snippets = list(transcript)
 
     if with_timestamps:
@@ -152,7 +176,7 @@ class TranscriptAppHandler(BaseHTTPRequestHandler):
             result = fetch_transcript(
                 video_url=video_url,
                 with_timestamps=bool(payload.get("timestamps", False)),
-                languages=normalize_languages(payload.get("languages", ["vi", "en"])),
+                languages=normalize_languages(payload.get("languages", [])),
             )
             self.send_json(
                 {

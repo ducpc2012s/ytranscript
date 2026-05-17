@@ -44,10 +44,6 @@ form.addEventListener("submit", async (event) => {
   const formData = new FormData(form);
   const payload = {
     url: formData.get("url"),
-    languages: String(formData.get("languages") || "vi,en")
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean),
     timestamps: formData.get("format") === "timestamp",
   };
 
