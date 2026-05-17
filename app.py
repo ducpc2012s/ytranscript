@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -122,6 +123,10 @@ class TranscriptAppHandler(BaseHTTPRequestHandler):
     server_version = "TranscriptStudio/1.0"
 
     def do_GET(self) -> None:
+        if self.path == "/healthz":
+            self.send_json({"ok": True, "service": "transcript-studio"})
+            return
+
         if self.path == "/" or self.path.startswith("/?"):
             self.serve_static("index.html")
             return
@@ -204,7 +209,19 @@ class TranscriptAppHandler(BaseHTTPRequestHandler):
         return
 
 
-def run(host: str = "127.0.0.1", port: int = 8000) -> None:
+def get_runtime_config() -> tuple[str, int]:
+    port_raw = os.environ.get("PORT", "8000")
+    try:
+        port = int(port_raw)
+    except ValueError as exc:
+        raise SystemExit(f"Invalid PORT value: {port_raw}") from exc
+
+    default_host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+    host = os.environ.get("HOST", default_host)
+    return host, port
+
+
+def run(host: str, port: int) -> None:
     server = ThreadingHTTPServer((host, port), TranscriptAppHandler)
     startup_message = f"Transcript Studio is running at http://{host}:{port}"
     try:
@@ -219,4 +236,4 @@ def run(host: str = "127.0.0.1", port: int = 8000) -> None:
 
 
 if __name__ == "__main__":
-    run()
+    run(*get_runtime_config())

@@ -1,7 +1,8 @@
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
-from app import extract_video_id, format_timestamp, fetch_transcript
+from app import extract_video_id, format_timestamp, fetch_transcript, get_runtime_config
 
 
 class FakeTranscript:
@@ -46,6 +47,14 @@ class TranscriptAppTests(unittest.TestCase):
 
     def test_format_timestamp_with_hours(self):
         self.assertEqual(format_timestamp(3723.9), "01:02:03")
+
+    def test_runtime_config_defaults_to_localhost(self):
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(get_runtime_config(), ("127.0.0.1", 8000))
+
+    def test_runtime_config_uses_deploy_port_and_public_host(self):
+        with patch.dict("os.environ", {"PORT": "10000"}, clear=True):
+            self.assertEqual(get_runtime_config(), ("0.0.0.0", 10000))
 
     def test_fetch_transcript_plain(self):
         import app

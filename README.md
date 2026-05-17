@@ -17,6 +17,23 @@ Sau đó mở:
 http://127.0.0.1:8000
 ```
 
+## Deploy
+
+App tự đọc biến môi trường `PORT` của nền tảng deploy. Khi `PORT` tồn tại,
+server sẽ bind `0.0.0.0:$PORT` để reverse proxy bên ngoài truy cập được.
+
+Start command:
+
+```bash
+python app.py
+```
+
+Health check:
+
+```text
+/healthz
+```
+
 ## Cách dùng
 
 1. Dán link YouTube hoặc video ID.
